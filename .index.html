@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Study Abroad Counsellor App (GitHub Pages)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+  <style>
+    /* Smooth step transitions */
+    .step { display: none; }
+    .step.active { display: block; }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+  <!-- Header -->
+  <header class="sticky top-0 z-30 bg-white/80 backdrop-blur border-b">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <h1 class="text-xl md:text-2xl font-bold">🎓 Study Abroad Counsellor</h1>
+      <nav class="flex gap-2 text-sm">
+        <button class="tab-btn px-3 py-1.5 rounded-lg hover:bg-gray-100" data-tab="questionnaire">Questionnaire</button>
+        <button class="tab-btn px-3 py-1.5 rounded-lg hover:bg-gray-100" data-tab="search">Database Search</button>
+        <button class="tab-btn px-3 py-1.5 rounded-lg hover:bg-gray-100" data-tab="psychometric">Psychometric</button>
+        <button class="tab-btn px-3 py-1.5 rounded-lg hover:bg-gray-100" data-tab="export">Export</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-6 space-y-8">
+    <!-- Intro / Status -->
+    <section class="rounded-2xl p-4 md:p-6 bg-white shadow-sm border">
+      <p class="text-sm text-gray-600">GitHub Pages-friendly, client-side app. Add your datasets in <code>/data</code> (JSON) or use the embedded samples. No server needed.</p>
+      <div class="mt-3 text-xs text-gray-500">Tips: Replace sample JSONs with your real data: <code>data/colleges.json</code>, <code>data/immigration.json</code>, <code>data/courses.json</code>. The app auto-loads them if present.</div>
+    </section>
+
+    <!-- TABS -->
+    <section id="tab-questionnaire" class="tab-pane">
+      <div class="grid md:grid-cols-3 gap-6">
+        <!-- Form Panel -->
+        <div class="md:col-span-2 bg-white border shadow-sm rounded-2xl p-4 md:p-6">
+          <h2 class="text-lg font-semibold mb-4">Foreign Education Counselling Questionnaire</h2>
+          <form id="counsellingForm" class="space-y-6">
+            <!-- STEP 1: Academic Background -->
+            <div class="step active" data-step="1">
+              <h3 class="font-semibold text-gray-800 mb-2">Section 1: Academic Background</h3>
+              <div class="grid md:grid-cols-2 gap-4">
+                <label class="block">Full Name
+                  <input type="text" name="fullName" required class="mt-1 w-full rounded-xl border px-3 py-2" />
+                </label>
+                <label class="block">Email Address
+                  <input type="email" name="email" required class="mt-1 w-full rounded-xl border px-3 py-2" />
+                </label>
+                <label class="block">Phone Number
+                  <input type="tel" name="phone" required class="mt-1 w-full rounded-xl border px-3 py-2" />
+                </label>
+                <label class="block">Highest Qualification
+                  <select name="highestQualification" required class="mt-1 w-full rounded-xl border px-3 py-2">
+                    <option value="">Select</option>
+                    <option>10th</option>
+                    <option>12th</option>
+                    <option>Diploma</option>
+                    <option>Graduation</option>
+                    <option>Post-Graduation</option>
+                    <option>Other</option>
+                  </select>
+                </label>
+                <label class="block">Field of Study
+                  <input type="text" name="fieldOfStudy" required class="mt-1 w-full rounded-xl border px-3 py-2" />
+                </label>
+                <label class="block">Year of Completion
+                  <select name="yearOfCompletion" required class="mt-1 w-full rounded-xl border px-3 py-2" id="yearDropdown"></select>
+                </label>
+                <label class="block">10th %
+                  <input type="number" name="tenthPercent" min="0" max="100" step="0.1" required class="mt-1 w-full rounded-xl border px-3 py-2" />
+                </label>
+                <label class="block">12th %
+                  <input type="number" name="twelfthPercent" min="0" max="100" step="0.1" required class="mt-1 w-full rounded-xl border px-3 py-2" />
+                </label>
+                <label class="block md:col-span-2">Graduation % (if applicable)
+                  <input type="number" name="graduationPercent" min="0" max="100" step="0.1" class="mt-1 w-full rounded-xl border px-3 py-2" />
+                </label>
+              </div>
+              <div class="mt-4 flex justify-between">
+                <span></span>
+                <button type="button" class="next-btn px-4 py-2 rounded-xl bg-blue-600 text-white" data-next="2">Next</button>
+              </div>
+            </div>
+
+            <!-- STEP 2: Gap & Backlogs -->
+            <div class="step" data-step="2">
+              <h3 class="font-semibold text-gray-800 mb-2">Section 2: Gap & Backlogs</h3>
+              <div class="grid md:grid-cols-2 gap-4">
+                <label class="block">Do you have any study gaps?
+                  <select name="hasGap" class="mt-1 w-full rounded-xl border px-3 py-2" id="hasGap">
+                    <option value="No">No</option>
+                    <option value="Yes">Yes</option>
+                  </select>
+                </label>
+                <label class="block" id="gapYearsWrap" style="display:none;">If Yes, how many years?
+                  <select name="gapYears" class="mt-1 w-full rounded-xl border px-3 py-2">
+                    <option>1</option><option>2</option><option>3</option><option>4</option><option>5+</option>
+                  </select>
+                </label>
+                <label class="block">Do you have any backlogs?
+                  <select name="hasBacklogs" class="mt-1 w-full rounded-xl border px-3 py-2" id="hasBacklogs">
+                    <option value="No">No</option>
+                    <option value="Yes">Yes</option>
+                  </select>
+                </label>
+                <label class="block" id="backlogCountWrap" style="display:none;">If Yes, how many?
+                  <select name="backlogCount" class="mt-1 w-full rounded-xl border px-3 py-2">
+                    <option>1–5</option><option>6–10</option><option>10+</option>
+                  </select>
+                </label>
+              </div>
+              <div class="mt-4 flex justify-between">
+                <button type="button" class="px-4 py-2 rounded-xl border" data-prev="1">Back</button>
+                <button type="button" class="next-btn px-4 py-2 rounded-xl bg-blue-600 text-white" data-next="3">Next</button>
+              </div>
+            </div>
+
+            <!-- STEP 3: English Proficiency -->
+            <div class="step" data-step="3">
+              <h3 class="font-semibold text-gray-800 mb-2">Section 3: English Proficiency</h3>
+              <div class="grid md:grid-cols-2 gap-4">
+                <label class="block">Have you taken any English test?
+                  <select name="englishTest" class="mt-1 w-full rounded-xl border px-3 py-2" id="englishTest">
+                    <option value="Not Yet">Not Yet</option>
+                    <option>IELTS</option>
+                    <option>PTE</option>
+                    <option>TOEFL</option>
+                    <option>Duolingo</option>
+                  </select>
+                </label>
+                <label class="block" id="englishScoreWrap" style="display:none;">Enter score / bands
+                  <input type="text" name="englishScore" class="mt-1 w-full rounded-xl border px-3 py-2" placeholder="e.g., IELTS 6.5 overall (R6, L6.5, W6, S6)" />
+                </label>
+              </div>
+              <div class="mt-4 flex justify-between">
+                <button type="button" class="px-4 py-2 rounded-xl border" data-prev="2">Back</button>
+                <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-600 text-white">Save Response</button>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- Summary Panel -->
+        <aside class="bg-white border shadow-sm rounded-2xl p-4 md:p-6">
+          <h3 class="font-semibold mb-2">Counsellor Summary</h3>
+          <div id="summary" class="text-sm text-gray-700 space-y-2">
+            <p>Fill the form to see a real-time summary here.</p>
+          </div>
+          <div class="mt-4 flex gap-2">
+            <button id="downloadCSV" class="px-3 py-1.5 rounded-xl border">Download CSV</button>
+            <button id="downloadJSON" class="px-3 py-1.5 rounded-xl border">Download JSON</button>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- DATABASE SEARCH TAB -->
+    <section id="tab-search" class="tab-pane hidden">
+      <div class="bg-white border shadow-sm rounded-2xl p-4 md:p-6 space-y-4">
+        <h2 class="text-lg font-semibold">Unified Database Search</h2>
+        <div class="grid md:grid-cols-4 gap-3">
+          <label class="block md:col-span-1">Dataset
+            <select id="datasetSelect" class="mt-1 w-full rounded-xl border px-3 py-2">
+              <option value="colleges">Indian Colleges</option>
+              <option value="immigration">Immigration</option>
+              <option value="courses">Global Courses</option>
+            </select>
+          </label>
+          <label class="block md:col-span-2">Search
+            <input id="searchInput" type="text" class="mt-1 w-full rounded-xl border px-3 py-2" placeholder="Try: IIT JEE cutoff / PSW UK / MSc Data Analytics" />
+          </label>
+          <div class="md:col-span-1 flex items-end">
+            <button id="searchBtn" class="w-full px-4 py-2 rounded-xl bg-blue-600 text-white">Search</button>
+          </div>
+        </div>
+        <div id="results" class="divide-y"></div>
+      </div>
+    </section>
+
+    <!-- PSYCHOMETRIC TAB -->
+    <section id="tab-psychometric" class="tab-pane hidden">
+      <div class="bg-white border shadow-sm rounded-2xl p-4 md:p-6 space-y-4">
+        <h2 class="text-lg font-semibold">Psychometric (RIASEC Quick Test)</h2>
+        <p class="text-sm text-gray-600">Answer 12 quick items (1–5). We'll suggest fields/courses aligned with your interests.</p>
+        <form id="riaSecForm" class="space-y-3"></form>
+        <div class="flex gap-2">
+          <button id="scoreRiaSec" class="px-4 py-2 rounded-xl bg-emerald-600 text-white">Get Suggestions</button>
+          <button id="resetRiaSec" class="px-4 py-2 rounded-xl border">Reset</button>
+        </div>
+        <div id="riaSecResult" class="text-sm text-gray-800"></div>
+      </div>
+    </section>
+
+    <!-- EXPORT TAB -->
+    <section id="tab-export" class="tab-pane hidden">
+      <div class="bg-white border shadow-sm rounded-2xl p-4 md:p-6 space-y-4">
+        <h2 class="text-lg font-semibold">Export & Data Setup</h2>
+        <ol class="list-decimal ml-5 text-sm space-y-2">
+          <li>Create a GitHub repo. Place this <code>index.html</code> at the root.</li>
+          <li>(Optional) Add <code>/data/colleges.json</code>, <code>/data/immigration.json</code>, <code>/data/courses.json</code> using the sample schemas below.</li>
+          <li>Push to <strong>main</strong>. In <em>Settings → Pages</em>, set Source to <strong>Deploy from a branch</strong>, Branch <strong>main</strong>, Folder <strong>/root</strong>. Your site goes live in ~1–2 minutes.</li>
+        </ol>
+        <details class="mt-2">
+          <summary class="cursor-pointer font-medium">Sample schemas</summary>
+          <pre class="text-xs bg-gray-50 p-3 rounded-xl overflow-x-auto">
+// data/colleges.json (array)
+[
+  {
+    "name": "IIT Bombay",
+    "exam": "JEE Advanced",
+    "cutoff": "AIR ≤ 2500",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "website": "https://www.iitb.ac.in"
+  }
+]
+
+// data/immigration.json (array)
+[
+  {
+    "country": "United Kingdom",
+    "scheme": "Graduate Route (PSW)",
+    "eligibility": "Complete eligible UK degree",
+    "fees": "£715 + IHS",
+    "duration": "2 years (3 for PhD)",
+    "notes": "Apply before visa expiry"
+  }
+]
+
+// data/courses.json (array)
+[
+  {
+    "university": "University of Glasgow",
+    "course": "MSc Data Analytics",
+    "country": "UK",
+    "requirements": "Bachelor 2:1, IELTS 6.5",
+    "otherExams": "GRE optional",
+    "url": "https://www.gla.ac.uk/"
+  }
+]
+          </pre>
+        </details>
+        <p class="text-xs text-gray-600">Large datasets (e.g., 87k courses) are supported; the app loads JSON client-side. Consider splitting into multiple JSON files per country to keep first-load fast.</p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // ---------- Utilities ----------
+    function $(sel, root=document){ return root.querySelector(sel); }
+    function $all(sel, root=document){ return [...root.querySelectorAll(sel)]; }
+    function download(filename, text){
+      const blob = new Blob([text], { type: 'application/json;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename; a.click();
+      setTimeout(()=>URL.revokeObjectURL(url), 5000);
+    }
+
+    // ---------- Tab Nav ----------
+    const tabs = {
+      questionnaire: $('#tab-questionnaire'),
+      search: $('#tab-search'),
+      psychometric: $('#tab-psychometric'),
+      export: $('#tab-export')
+    };
+    function showTab(name){
+      Object.entries(tabs).forEach(([k, el]) => {
+        if(k === name){ el.classList.remove('hidden'); } else { el.classList.add('hidden'); }
+      });
+      $all('.tab-btn').forEach(btn=>{
+        btn.classList.toggle('bg-gray-900/90', btn.dataset.tab===name);
+        btn.classList.toggle('text-white', btn.dataset.tab===name);
+      })
+    }
+    $all('.tab-btn').forEach(btn=>btn.addEventListener('click', ()=>showTab(btn.dataset.tab)));
+    showTab('questionnaire');
+
+    // ---------- Year Dropdown ----------
+    const yearSel = document.getElementById('yearDropdown');
+    (function fillYears(){
+      const start=2015, end=2030;
+      yearSel.innerHTML = '<option value="">Select</option>' +
+        Array.from({length: end-start+1}, (_,i)=>start+i)
+          .map(y=>`<option>${y}</option>`).join('');
+    })();
+
+    // ---------- Multi-step Form Flow ----------
+    const form = document.getElementById('counsellingForm');
+    const steps = $all('.step');
+    function goStep(n){
+      steps.forEach(s=>s.classList.remove('active'));
+      const target = steps.find(s=>s.dataset.step===String(n));
+      if(target) target.classList.add('active');
+      window.scrollTo({ top: 0, behavior:'smooth' });
+    }
+    $all('.next-btn').forEach(btn=>btn.addEventListener('click', ()=>goStep(btn.dataset.next)));
+    $all('[data-prev]').forEach(btn=>btn.addEventListener('click', ()=>goStep(btn.dataset.prev)));
+
+    // Conditional visibility
+    const hasGap = document.getElementById('hasGap');
+    const gapYearsWrap = document.getElementById('gapYearsWrap');
+    hasGap.addEventListener('change', ()=>{
+      gapYearsWrap.style.display = hasGap.value==='Yes' ? 'block' : 'none';
+    });
+
+    const hasBacklogs = document.getElementById('hasBacklogs');
+    const backlogCountWrap = document.getElementById('backlogCountWrap');
+    hasBacklogs.addEventListener('change', ()=>{
+      backlogCountWrap.style.display = hasBacklogs.value==='Yes' ? 'block' : 'none';
+    });
+
+    const englishTest = document.getElementById('englishTest');
+    const englishScoreWrap = document.getElementById('englishScoreWrap');
+    englishTest.addEventListener('change', ()=>{
+      englishScoreWrap.style.display = englishTest.value!=='Not Yet' ? 'block' : 'none';
+    });
+
+    // Live Summary
+    const summary = document.getElementById('summary');
+    function updateSummary(data){
+      summary.innerHTML = `
+        <div><strong>Name:</strong> ${data.fullName || '-'} </div>
+        <div><strong>Contact:</strong> ${data.email || '-'} | ${data.phone || '-'} </div>
+        <div><strong>Academics:</strong> ${data.highestQualification || '-'} in ${data.fieldOfStudy || '-'}, Year ${data.yearOfCompletion || '-'} </div>
+        <div><strong>Scores:</strong> 10th ${data.tenthPercent || '-'}%, 12th ${data.twelfthPercent || '-'}%, Grad ${data.graduationPercent || '-'}% </div>
+        <div><strong>Gaps/Backlogs:</strong> Gap ${data.hasGap || 'No'} ${data.gapYears? '('+data.gapYears+')':''} | Backlogs ${data.hasBacklogs || 'No'} ${data.backlogCount? '('+data.backlogCount+')':''} </div>
+        <div><strong>English Test:</strong> ${data.englishTest || 'Not Yet'} ${data.englishScore? '('+data.englishScore+')':''}</div>
+      `;
+    }
+    form.addEventListener('input', ()=>{
+      const fd = new FormData(form);
+      const obj = Object.fromEntries(fd.entries());
+      updateSummary(obj);
+    });
+
+    // Persist & Export
+    const RESP_KEY = 'counsellingResponses';
+    function getAllResponses(){
+      try { return JSON.parse(localStorage.getItem(RESP_KEY)) || []; } catch(e){ return []; }
+    }
+    function saveResponse(obj){
+      const all = getAllResponses();
+      all.push({ ...obj, ts: new Date().toISOString() });
+      localStorage.setItem(RESP_KEY, JSON.stringify(all));
+    }
+    form.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const fd = new FormData(form);
+      const obj = Object.fromEntries(fd.entries());
+      saveResponse(obj);
+      updateSummary(obj);
+      alert('Saved locally. Use Export tab to download.');
+      form.reset();
+      englishScoreWrap.style.display='none';
+      gapYearsWrap.style.display='none';
+      backlogCountWrap.style.display='none';
+      goStep(1);
+    });
+
+    function toCSV(arr){
+      if(!arr.length) return '';
+      const headers = Object.keys(arr[0]);
+      const rows = arr.map(o=>headers.map(h=>`"${String(o[h]??'').replace(/"/g,'""')}"`).join(','));
+      return headers.join(',') + '\n' + rows.join('\n');
+    }
+    document.getElementById('downloadCSV').addEventListener('click', ()=>{
+      const all = getAllResponses();
+      if(!all.length) return alert('No data yet.');
+      const csv = toCSV(all);
+      download('counselling_responses.csv', csv);
+    });
+    document.getElementById('downloadJSON').addEventListener('click', ()=>{
+      const all = getAllResponses();
+      if(!all.length) return alert('No data yet.');
+      download('counselling_responses.json', JSON.stringify(all, null, 2));
+    });
+
+    // ---------- Data (fallback samples, auto-replaced if /data/*.json exists) ----------
+    let DATA = {
+      colleges: [
+        { name: 'IIT Bombay', exam: 'JEE Advanced', cutoff: 'AIR ≤ 2500', city: 'Mumbai', state: 'Maharashtra', website: 'https://www.iitb.ac.in' },
+        { name: 'AIIMS Delhi', exam: 'NEET-UG', cutoff: 'AIR ≤ 100', city: 'New Delhi', state: 'Delhi', website: 'https://www.aiims.edu' },
+        { name: 'IISc Bangalore', exam: 'JEE Main/Advanced, KVPY', cutoff: 'Top 1%', city: 'Bengaluru', state: 'Karnataka', website: 'https://iisc.ac.in' }
+      ],
+      immigration: [
+        { country: 'United Kingdom', scheme: 'Graduate Route (PSW)', eligibility: 'Complete eligible UK degree', fees: '£715 + IHS', duration: '2 years (3 for PhD)', notes: 'Apply before visa expiry' },
+        { country: 'Canada', scheme: 'PGWP', eligibility: 'Eligible DLI + program length', fees: 'CAD$255', duration: 'Up to 3 years', notes: 'Length depends on program' },
+        { country: 'Australia', scheme: 'Temporary Graduate (485)', eligibility: 'Eligible Aus. degree', fees: 'AUD$1,895+', duration: '2–4 years', notes: 'Streams vary' }
+      ],
+      courses: [
+        { university:'University of Glasgow', course:'MSc Data Analytics', country:'UK', requirements:'Bachelor 2:1, IELTS 6.5', otherExams:'GRE optional', url:'https://www.gla.ac.uk/' },
+        { university:'TU Delft', course:'MSc Aerospace Engineering', country:'Netherlands', requirements:'BEng, IELTS 6.5', otherExams:'GRE recommended', url:'https://www.tudelft.nl/' },
+        { university:'Arizona State University', course:'MS Computer Science', country:'USA', requirements:'Bachelor CS, TOEFL 90', otherExams:'GRE optional', url:'https://www.asu.edu/' }
+      ]
+    };
+
+    async function tryLoadExternal(){
+      try {
+        const [c1,c2,c3] = await Promise.allSettled([
+          fetch('data/colleges.json'),
+          fetch('data/immigration.json'),
+          fetch('data/courses.json')
+        ]);
+        if(c1.value && c1.value.ok){ DATA.colleges = await c1.value.json(); }
+        if(c2.value && c2.value.ok){ DATA.immigration = await c2.value.json(); }
+        if(c3.value && c3.value.ok){ DATA.courses = await c3.value.json(); }
+      } catch(e){ console.warn('Using embedded sample data.'); }
+    }
+    tryLoadExternal();
+
+    // ---------- Search ----------
+    const datasetSelect = document.getElementById('datasetSelect');
+    const searchInput = document.getElementById('searchInput');
+    const searchBtn = document.getElementById('searchBtn');
+    const resultsEl = document.getElementById('results');
+
+    function buildFuse(dataset){
+      let list = DATA[dataset] || [];
+      let keys = [];
+      if(dataset==='colleges') keys = ['name','exam','cutoff','city','state'];
+      if(dataset==='immigration') keys = ['country','scheme','eligibility','fees','duration','notes'];
+      if(dataset==='courses') keys = ['university','course','country','requirements','otherExams'];
+      return new Fuse(list, { keys, includeScore: true, threshold: 0.4 });
+    }
+
+    function renderResults(dataset, items){
+      resultsEl.innerHTML = '';
+      if(!items.length){ resultsEl.innerHTML = '<div class="py-6 text-sm text-gray-500">No matches.</div>'; return; }
+      items.slice(0, 50).forEach(res=>{
+        const d = res.item;
+        const card = document.createElement('div');
+        card.className = 'py-3';
+        if(dataset==='colleges'){
+          card.innerHTML = `
+            <div class="flex items-start justify-between">
+              <div>
+                <div class="font-medium">${d.name}</div>
+                <div class="text-xs text-gray-600">Exam: ${d.exam} • Cutoff: ${d.cutoff} • ${d.city}, ${d.state}</div>
+              </div>
+              ${d.website?`<a class="text-blue-600 text-sm" target="_blank" href="${d.website}">Website</a>`:''}
+            </div>`;
+        } else if(dataset==='immigration'){
+          card.innerHTML = `
+            <div class="font-medium">${d.country} — ${d.scheme}</div>
+            <div class="text-xs text-gray-600">Eligibility: ${d.eligibility} • Fees: ${d.fees} • Duration: ${d.duration}</div>
+            <div class="text-xs text-gray-500">${d.notes||''}</div>`;
+        } else {
+          card.innerHTML = `
+            <div class="flex items-start justify-between">
+              <div>
+                <div class="font-medium">${d.course} — ${d.university}</div>
+                <div class="text-xs text-gray-600">${d.country} • Req: ${d.requirements} • ${d.otherExams||''}</div>
+              </div>
+              ${d.url?`<a class="text-blue-600 text-sm" target="_blank" href="${d.url}">Program</a>`:''}
+            </div>`;
+        }
+        resultsEl.appendChild(card);
+      });
+    }
+
+    let currentFuse = buildFuse(datasetSelect.value);
+    datasetSelect.addEventListener('change', ()=>{
+      currentFuse = buildFuse(datasetSelect.value);
+      resultsEl.innerHTML='';
+    });
+    searchBtn.addEventListener('click', ()=>{
+      const q = searchInput.value.trim();
+      if(!q){ resultsEl.innerHTML = '<div class="py-6 text-sm text-gray-500">Type something to search…</div>'; return; }
+      const out = currentFuse.search(q);
+      renderResults(datasetSelect.value, out);
+    });
+    searchInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); searchBtn.click(); }});
+
+    // ---------- Psychometric (RIASEC) ----------
+    const RIASEC_QUESTIONS = [
+      { text: 'I like building, fixing, or working with tools/machines.', dim: 'R' },
+      { text: 'I enjoy science experiments or solving technical problems.', dim: 'I' },
+      { text: 'I like creative writing, art, music, or design.', dim: 'A' },
+      { text: 'I enjoy helping, teaching, or counseling people.', dim: 'S' },
+      { text: 'I like leading teams, selling, or starting ventures.', dim: 'E' },
+      { text: 'I enjoy organizing data, working with numbers/spreadsheets.', dim: 'C' },
+      { text: 'I prefer outdoor, hands-on activities.', dim: 'R' },
+      { text: 'I enjoy analyzing data and researching topics in depth.', dim: 'I' },
+      { text: 'I like expressing myself through visuals, words, or performance.', dim: 'A' },
+      { text: 'I feel fulfilled when supporting others to grow.', dim: 'S' },
+      { text: 'I am motivated by targets and influencing others.', dim: 'E' },
+      { text: 'I like making systems efficient and consistent.', dim: 'C' }
+    ];
+    const RIASEC_MAP = {
+      R: 'Realistic', I: 'Investigative', A: 'Artistic', S: 'Social', E: 'Enterprising', C: 'Conventional'
+    };
+    const RIASEC_SUGGEST = {
+      R: ['Mechanical Engg', 'Aviation Maintenance', 'Civil Engg'],
+      I: ['Data Science', 'Aerospace', 'Biotech'],
+      A: ['Design', 'Media & Comm', 'Architecture'],
+      S: ['Psychology', 'Education', 'Healthcare Mgmt'],
+      E: ['MBA', 'Marketing', 'Entrepreneurship'],
+      C: ['Accounting', 'Business Analytics', 'MIS']
+    };
+
+    const riaForm = document.getElementById('riaSecForm');
+    function renderRiaForm(){
+      riaForm.innerHTML = '';
+      RIASEC_QUESTIONS.forEach((q, idx)=>{
+        const row = document.createElement('div');
+        row.className = 'flex items-center justify-between gap-3 border rounded-xl px-3 py-2';
+        row.innerHTML = `
+          <div class="text-sm">${idx+1}. ${q.text}</div>
+          <select class="rounded-lg border px-2 py-1" name="q${idx}" aria-label="${q.text}">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3" selected>3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>`;
+        riaForm.appendChild(row);
+      });
+    }
+    renderRiaForm();
+
+    function scoreRIASEC(){
+      const scores = { R:0, I:0, A:0, S:0, E:0, C:0 };
+      RIASEC_QUESTIONS.forEach((q, idx)=>{
+        const val = Number(($(`[name="q${idx}"]`)).value || 3);
+        scores[q.dim] += val;
+      });
+      const sorted = Object.entries(scores).sort((a,b)=>b[1]-a[1]);
+      return { scores, sorted, code: sorted.map(([k])=>k).slice(0,3).join('') };
+    }
+
+    const riaRes = document.getElementById('riaSecResult');
+    document.getElementById('scoreRiaSec').addEventListener('click', (e)=>{
+      e.preventDefault();
+      const { scores, sorted, code } = scoreRIASEC();
+      const top = sorted.slice(0,2).map(([k,v])=>`${RIASEC_MAP[k]} (${k})`).join(' + ');
+      const sugg = sorted.slice(0,2).flatMap(([k])=>RIASEC_SUGGEST[k]).slice(0,6);
+      riaRes.innerHTML = `
+        <div class="mt-2 border rounded-2xl p-3">
+          <div class="font-medium">Your tilt: ${top} | Code: <span class="font-mono">${code}</span></div>
+          <div class="text-sm mt-1">Suggested fields: ${sugg.join(', ')}</div>
+          <div class="text-xs text-gray-500 mt-1">Use the Database Search to find matching courses (try typing the suggested fields).</div>
+        </div>`;
+    });
+    document.getElementById('resetRiaSec').addEventListener('click', (e)=>{ e.preventDefault(); renderRiaForm(); riaRes.innerHTML=''; });
+  </script>
+</body>
+</html>
